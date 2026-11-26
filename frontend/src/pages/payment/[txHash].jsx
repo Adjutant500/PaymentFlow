@@ -19,6 +19,7 @@ import {
 } from "../../components/Icons";
 import { getStudentPayments, flagDispute, initiateRefund } from "../../services/api";
 import { PAYMENT_STATUS } from "../../utils/paymentStatus";
+import ReceiptDownloadButton from "../../components/ReceiptDownloadButton";
 
 const STELLAR_EXPLORER_BASE =
   process.env.NEXT_PUBLIC_STELLAR_NETWORK === "mainnet"
@@ -747,6 +748,12 @@ function PaymentDetailContent({ studentId, txHash }) {
 
           {/* Sidebar: contextual actions */}
           <div className="pd-sidebar" style={{ width: 280, flexShrink: 0 }}>
+            {/* PDF receipt download — Issue #604 (confirmed payments only) */}
+            {payment.status === PAYMENT_STATUS.SUCCESS && (
+              <div style={{ marginBottom: "1rem" }}>
+                <ReceiptDownloadButton txHash={payment.txHash} />
+              </div>
+            )}
             <ActionPanel payment={payment} onActionComplete={load} />
 
             {/* Audit trail summary */}
@@ -776,8 +783,10 @@ export default function PaymentDetailPage() {
       {router.isReady ? (
         <PaymentDetailContent studentId={studentId} txHash={txHash} />
       ) : (
-        <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}>
-          {t("actions.loading")}
+        <div className="page-wrap" role="status" aria-live="polite" aria-busy="true" aria-label={t("actions.loading")}>
+          <SkeletonBlock height={140} style={{ marginBottom: "1.5rem", borderRadius: "var(--radius-lg)" }} />
+          <SkeletonDetailCard rows={4} />
+          <SkeletonDetailCard rows={4} />
         </div>
       )}
     </RequireAdmin>
